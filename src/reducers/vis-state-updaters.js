@@ -105,6 +105,11 @@ disableStackCapturing();
 const visStateUpdaters = null;
 /* eslint-enable no-unused-vars */
 
+export const DEFAULT_EDITOR = {
+  features: [],
+  selectedFeature: null
+};
+
 /**
  * Default initial `visState`
  * @memberof visStateUpdaters
@@ -170,11 +175,7 @@ export const INITIAL_VIS_STATE = {
   // defaults layer classes
   layerClasses: LayerClasses,
 
-  editor: {
-    // GEO FEATURES (Shapes)
-    features: []
-  }
-
+  editor: DEFAULT_EDITOR
 };
 
 function updateStateWithLayerAndData(state, {layerData, layer, idx}) {
@@ -263,6 +264,36 @@ function updateTextLabelPropAndValue(idx, prop, value, textLabel) {
   }
 
   return newTextLabel;
+}
+
+function getFilterAndLayerByFeatureId(state, featureId) {
+  const filter = state.filters.find(f =>
+    f.type === FILTER_TYPES.polygon && f.value.id === featureId
+  );
+
+  return {
+    filter,
+    ...(filter ? {layer: state.layers.find(l => l.id === filter.layerId)} : {})
+  };
+}
+
+function removeFeatureFilter(state, filter, dataId) {
+  // delete existing polygon filter
+  const filters = state.filters.filter(f => f.id !== filter.id);
+
+  const newState = {
+    ...state,
+    datasets: {
+      ...state.datasets,
+      [dataId]: {
+        ...state.datasets[dataId],
+        ...filterData(state.datasets[dataId].allData, dataId, filters, state.layers)
+      }
+    },
+    filters
+  };
+
+  return updateAllLayerDomainData(newState, dataId);
 }
 
 export function layerTextLabelChangeUpdater(state, action) {
@@ -1372,34 +1403,31 @@ export function updateAllLayerDomainData(state, dataId, newFilter) {
  * @return {Object} nextState
  */
 export function setFeaturesUpdater(state, {features = []}) {
+  // TODO: retrieve current feature it from state
+  // TODO: update filters if exists
   return {
     ...state,
     editor: {
       ...state.editor,
       features
     }
-  }
-}
-
-
-function removeFeatureFilter(state, filter, dataId) {
-  // delete existing polygon filter
-  const filters = state.filters.filter(f => f.id !== filter.id);
-
-  const newState = {
-    ...state,
-    datasets: {
-      ...state.datasets,
-      [dataId]: {
-        ...state.datasets[dataId],
-        ...filterData(state.datasets[dataId].allData, dataId, filters, state.layers)
-      }
-    },
-    filters
   };
-
-  return updateAllLayerDomainData(newState, dataId);
 }
+
+/**
+ * Set the current selected feature
+ * @memberof uiStateUpdaters
+ * @param {Object} state `uiState`
+ * @param {[Object]} features to store
+ * @return {Object} nextState
+ */
+export const setSelectedFeatureUpdater = (state, {payload: selectedFeatureId}) => ({
+  ...state,
+  editor: {
+    ...state.editor,
+    selectedFeature: {id: selectedFeatureId}
+  }
+});
 
 /**
  * Delete existing feature from filters
@@ -1479,15 +1507,4 @@ export function togglePolygonFilterUpdater(state, payload) {
   }
 
   removeFeatureFilter(state, filter, dataId);
-}
-
-function getFilterAndLayerByFeatureId(state, featureId) {
-  const filter = state.filters.find(f =>
-    f.type === FILTER_TYPES.polygon && f.value.id === featureId
-  );
-
-  return {
-    filter,
-    ...(filter ? {layer: state.layers.find(l => l.id === filter.layerId)} : {})
-  };
 }
