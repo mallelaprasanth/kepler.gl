@@ -259,28 +259,6 @@ function removeFeatureFilter(state, filter, dataId) {
   return updateAllLayerDomainData(newState, dataId);
 }
 
-// function applyFilter(state, dataId, filters, filter) {
-//   const {allData} = state.datasets[dataId];
-//
-//   let newState = {
-//     ...state,
-//     // setting fitlers
-//     filters,
-//     // updating datasets
-//     datasets: {
-//       ...state.datasets,
-//       [dataId]: {
-//         ...state.datasets[dataId],
-//         ...filterData(allData, dataId, filters, state.layers)
-//       }
-//     }
-//   };
-//
-//   newState = updateAllLayerDomainData(newState, dataId, filter);
-//
-//   return newState;
-// }
-
 /**
  * Update layer base config: dataId, label, column, isVisible
  * @memberof visStateUpdaters
@@ -731,7 +709,7 @@ export const removeFilterUpdater = (state, action) => {
       ...state.datasets,
       [dataId]: {
         ...state.datasets[dataId],
-        ...filterData(state.datasets[dataId].allData, dataId, newFilters)
+        ...filterData(state.datasets[dataId].allData, dataId, newFilters, state.layers)
       }
     },
     filters: newFilters
@@ -1120,15 +1098,16 @@ export const updateVisDataUpdater = (state, action) => {
     interactionToBeMerged = {}
   } = stateWithNewData;
 
-  // merge state with saved filters
-  let mergedState = mergeFilters(stateWithNewData, filterToBeMerged);
   // merge state with saved layers
-  mergedState = mergeLayers(mergedState, layerToBeMerged);
+  let mergedState = mergeLayers(stateWithNewData, layerToBeMerged);
 
   if (mergedState.layers.length === state.layers.length) {
     // no layer merged, find defaults
     mergedState = addDefaultLayers(mergedState, newDateEntries);
   }
+
+  // merge state with saved filters
+  mergedState = mergeFilters(mergedState, filterToBeMerged);
 
   if (mergedState.splitMaps.length) {
     const newLayers = mergedState.layers.filter(
