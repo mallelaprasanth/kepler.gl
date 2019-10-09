@@ -52,6 +52,16 @@ export function findDefaultLayer(dataset, layerClasses) {
   return layers;
 }
 
+// export function findEDLayerByURL(URL,layerClasses) {
+//   if (!URL) {
+//     return [];
+//   }
+
+  
+
+//   return layers;
+// }
+
 /**
  * calculate layer data based on layer type, col Config,
  * return updated layer if colorDomain, dataMap has changed

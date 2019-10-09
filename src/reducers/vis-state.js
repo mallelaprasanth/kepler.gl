@@ -50,6 +50,7 @@ const actionHandler = {
   [ActionTypes.LAYER_VISUAL_CHANNEL_CHANGE]: visStateUpdaters.layerVisualChannelChangeUpdater,
 
   [ActionTypes.LOAD_FILES]: visStateUpdaters.loadFilesUpdater,
+  [ActionTypes.LOAD_ED_LINK]: visStateUpdaters.loadEDLinkData,
 
   [ActionTypes.LOAD_FILES_ERR]: visStateUpdaters.loadFilesErrUpdater,
 

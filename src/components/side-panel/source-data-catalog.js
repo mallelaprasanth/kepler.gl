@@ -162,7 +162,7 @@ function SourceDataCatalogFactory() {
           </DatasetTitle>
           {showDatasetTable ? (
             <DataRowCount className="source-data-rows">{`${numFormat(
-              dataset.allData.length
+              dataset.allData ? dataset.allData.length:null
             )} rows`}</DataRowCount>
           ) : null}
         </SidePanelSection>

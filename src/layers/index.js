@@ -29,7 +29,7 @@ import {default as IconLayer} from './icon-layer/icon-layer';
 import {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
 import {default as H3Layer} from './h3-hexagon-layer/h3-hexagon-layer';
 import {default as ScenegraphLayer} from './scenegraph-layer/scenegraph-layer';
-
+import {default as MVTLayer} from './mvt-geojson-layer/mvt-geojson-layer';
 // base layer
 export {default as Layer} from './base-layer';
 
@@ -45,7 +45,8 @@ export const KeplerGlLayers = {
   IconLayer,
   HeatmapLayer,
   H3Layer,
-  ScenegraphLayer
+  ScenegraphLayer,
+  MVTLayer
 };
 
 export const LayerClasses = {
@@ -59,5 +60,6 @@ export const LayerClasses = {
   icon: IconLayer,
   heatmap: HeatmapLayer,
   hexagonId: H3Layer,
-  '3D': ScenegraphLayer
+  '3D': ScenegraphLayer,
+  mvt:MVTLayer
 };

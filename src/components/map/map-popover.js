@@ -153,7 +153,7 @@ export default function MapPopoverFactory(LayerHoverInfo, CoordinateInfo) {
         Number.isFinite(x) && Number.isFinite(y) ? this._getPosition(x, y) : {};
 
       return (
-        <StyledMapPopover
+        <StyledMapPopover id='tooltip'
           ref={this.popover}
           className="map-popover"
           style={{

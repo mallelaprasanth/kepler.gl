@@ -163,7 +163,7 @@ export function loadRemoteMap(options) {
  * @returns {Promise<any>}
  */
 function loadRemoteRawData(url) {
-  if (!url) {
+  if (!url || url.indexOf('.mvt')>-1) {
     // TODO: we should return reject with an appropriate error
     return Promise.resolve(null)
   }

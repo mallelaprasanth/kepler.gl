@@ -65,8 +65,8 @@ const Row = ({name, value, url}) => {
 
 const EntryInfo = ({fieldsToShow, fields, data}) => (
   <tbody>
-    {fieldsToShow.map(name => (
-      <EntryInfoRow key={name} name={name} fields={fields} data={data} />
+    {fieldsToShow.map((name,idx) => (
+      <EntryInfoRow key={idx} name={name} fields={fields} data={data} />
     ))}
   </tbody>
 );

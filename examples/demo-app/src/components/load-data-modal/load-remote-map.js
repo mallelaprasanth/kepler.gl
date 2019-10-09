@@ -21,7 +21,9 @@
 // TODO: this will move onto kepler.gl core
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import {connect} from 'react-redux'
 import styled from 'styled-components';
+import {addLayer} from 'kepler.gl/actions'
 import {CORS_LINK, LOADING_URL_MESSAGE} from '../../constants/default-settings';
 
 const propTypes = {
@@ -111,11 +113,12 @@ class LoadRemoteMap extends Component {
 
   onLoadRemoteMap  = () => {
     const {dataUrl} = this.state;
-    if (!dataUrl) {
-      return;
-    }
+    this.props.dispatch(addLayer({URL:dataUrl}));
+    // if (!dataUrl) {
+    //   return;
+    // }
 
-    this.props.onLoadRemoteMap({dataUrl});
+    // this.props.onLoadRemoteMap({dataUrl});
   };
 
   render() {
@@ -158,4 +161,6 @@ class LoadRemoteMap extends Component {
 
 LoadRemoteMap.propTypes = propTypes;
 
-export default LoadRemoteMap;
+const mapDispatchToProps = dispatch => ({ dispatch})
+
+export default connect(null, mapDispatchToProps)(LoadRemoteMap);

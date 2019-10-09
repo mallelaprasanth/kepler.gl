@@ -19,23 +19,23 @@
 // THE SOFTWARE.
 
 // libraries
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MapboxGLMap from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import {createSelector} from 'reselect';
+import { createSelector } from 'reselect';
 import WebMercatorViewport from 'viewport-mercator-project';
 
 // components
 import MapPopoverFactory from 'components/map/map-popover';
 import MapControlFactory from 'components/map/map-control';
-import {StyledMapContainer} from 'components/common/styled-components';
+import { StyledMapContainer } from 'components/common/styled-components';
 
 // utils
-import {generateMapboxLayers, updateMapboxLayers} from 'layers/mapbox-utils';
-import {OVERLAY_TYPE} from 'layers/base-layer';
-import {onWebGLInitialized, setLayerBlending} from 'utils/gl-utils';
-import {transformRequest} from 'utils/map-style-utils/mapbox-utils';
+import { generateMapboxLayers, updateMapboxLayers } from 'layers/mapbox-utils';
+import { OVERLAY_TYPE } from 'layers/base-layer';
+import { onWebGLInitialized, setLayerBlending } from 'utils/gl-utils';
+import { transformRequest } from 'utils/map-style-utils/mapbox-utils';
 
 // default-settings
 import ThreeDBuildingLayer from 'deckgl-layers/3d-building-layer/3d-building-layer';
@@ -152,7 +152,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
     _onWebGLInitialized = onWebGLInitialized;
 
     _handleMapToggleLayer = layerId => {
-      const {index: mapIndex = 0, visStateActions} = this.props;
+      const { index: mapIndex = 0, visStateActions } = this.props;
       visStateActions.toggleLayerForMap(mapIndex, layerId);
     };
 
@@ -193,7 +193,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       }
     };
 
-    _onBeforeRender = ({gl}) => {
+    _onBeforeRender = ({ gl }) => {
       setLayerBlending(gl, this.props.layerBlending);
     };
 
@@ -208,7 +208,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         datasets,
         interactionConfig,
         layers,
-        mousePos: {mousePosition, coordinate, pinned}
+        mousePos: { mousePosition, coordinate, pinned }
       } = this.props;
 
       if (!mousePosition) {
@@ -217,7 +217,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       // if clicked something, ignore hover behavior
       const objectInfo = clicked || hoverInfo;
       let layerHoverProp = null;
-      let position = {x: mousePosition[0], y: mousePosition[1]};
+      let position = { x: mousePosition[0], y: mousePosition[1] };
 
       if (
         interactionConfig.tooltip.enabled &&
@@ -225,7 +225,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         objectInfo.picked
       ) {
         // if anything hovered
-        const {object, layer: overlay} = objectInfo;
+        const { object, layer: overlay } = objectInfo;
 
         // deckgl layer to kepler-gl layer
         const layer = layers[overlay.props.idx];
@@ -234,19 +234,44 @@ export default function MapContainerFactory(MapPopover, MapControl) {
           layer.getHoverData &&
           layersToRender[layer.id]
         ) {
+          if (layer.name == 'mvtlayer') {
+            const { config: { dataId } } = layer;
+            const fieldKeys = Object.keys(object.properties)
+            let fields = [];
+            fields.push({format:"",id:"_geojson",name:"_geojson",tableFieldIndex:1,type:"geojson"})
+            fields.push({format:"",id:"population",name:"Population",tableFieldIndex:2,type:"integer"})
 
-          // if layer is visible and have hovered data
-          const {config: {dataId}} = layer;
-          const {allData, fields} = datasets[dataId];
-          const data = layer.getHoverData(object, allData);
-          const fieldsToShow = interactionConfig.tooltip.config.fieldsToShow[dataId];
+            let data = Object.values(object.properties);
+            data = [object,...data]
+            const fieldsToShow = fieldKeys;
 
-          layerHoverProp = {
-            data,
-            fields,
-            fieldsToShow,
-            layer
+            layerHoverProp = {
+              data,
+              fields,
+              fieldsToShow,
+              layer
+            }
           }
+          // if layer is visible and have hovered data
+          else {
+            if (!layer.dataId) {
+              const { config: { dataId } } = layer;
+              const { allData, fields } = datasets[dataId];
+              const data = layer.getHoverData(object, allData);
+              const fieldsToShow = interactionConfig.tooltip.config.fieldsToShow[dataId];
+              layerHoverProp = {
+                data,
+                fields,
+                fieldsToShow,
+                layer
+
+              }
+            }
+
+
+
+          }
+
         }
       }
 
@@ -276,7 +301,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
     _getHoverXY(viewport, lngLat) {
       const screenCoord = !viewport || !lngLat ? null : viewport.project(lngLat);
 
-      return screenCoord && {x: screenCoord[0], y: screenCoord[1]};
+      return screenCoord && { x: screenCoord[0], y: screenCoord[1] };
     }
 
     _renderLayer = (overlays, idx) => {
@@ -287,7 +312,9 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         clicked,
         mapState,
         interactionConfig,
-        mousePos
+        visStateActions,
+        mousePos,
+        datasets
       } = this.props;
       const layer = layers[idx];
       const data = layerData[idx];
@@ -310,7 +337,9 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         objectHovered,
         mapState,
         interactionConfig,
-        layerCallbacks
+        layerCallbacks,
+        datasets,
+        loadEDLinkData: (data,dataId)=>visStateActions.loadEDLinkData(data,dataId)
       });
 
       return overlays.concat(layerOverlay || []);
@@ -346,7 +375,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
           mapboxApiUrl,
           threeDBuildingColor: mapStyle.threeDBuildingColor,
           updateTriggers: {
-            getFillColor:  mapStyle.threeDBuildingColor
+            getFillColor: mapStyle.threeDBuildingColor
           }
         }));
       }
@@ -401,7 +430,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       const layersToRender = this.layersToRenderSelector(this.props);
       if (!mapStyle.bottomMapStyle) {
         // style not yet loaded
-        return <div/>;
+        return <div />;
       }
 
       const mapProps = {

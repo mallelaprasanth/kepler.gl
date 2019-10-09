@@ -434,6 +434,16 @@ export function loadFiles(files) {
   };
 }
 
+export function loadEDLinkData(data,dataId) {
+  return {
+    type: ActionTypes.LOAD_ED_LINK,
+    data,
+    dataId
+  };
+}
+
+
+
 /**
  * Trigger loading file error
  * @memberof visStateActions

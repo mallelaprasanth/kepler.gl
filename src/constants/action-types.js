@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import keyMirror from 'keymirror';
-import {ACTION_PREFIX} from './default-settings';
+import { ACTION_PREFIX } from './default-settings';
 
 /**
  * Kepler.gl action types, can be listened by reducers to perform additional tasks whenever an action is called in kepler.gl
@@ -52,6 +52,8 @@ import {ACTION_PREFIX} from './default-settings';
  * export default createStore(reducers, {}, applyMiddleware(taskMiddleware))
  */
 const ActionTypes = keyMirror({
+  LOAD_ED_LINK: null,
+
   // identity action
   REGISTER_ENTRY: null,
   DELETE_ENTRY: null,
