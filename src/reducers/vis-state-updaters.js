@@ -537,7 +537,8 @@ export function setFilterUpdater(state, action) {
         ...newState.datasets,
         [dataId]: {
           ...newState.datasets[dataId],
-          filters: tempFilters
+          filters: tempFilters,
+          ...filterData(allData, dataId, newState.filters)
         }
       }
     };
@@ -1353,6 +1354,7 @@ export const loadEDLinkData = (state, action) => {
 
   // let layerData =Object.assign(state.layerData);
   // layerData[idx] = data.features;
+  
 
   const stateWithNewData = {
     ...state,
@@ -1361,8 +1363,7 @@ export const loadEDLinkData = (state, action) => {
       [dataId]: {
         ...state.datasets[dataId], allData: allData,
         fields: fields,
-        data: allData.slice(), filteredIndex: allData.map((_, i) => i),
-        filteredIndexForDomain: allData.map((_, i) => i),
+        ...filterData(allData,dataId,state.filters),
         fieldPairs: findPointFieldPairs(fields)
       }
     },

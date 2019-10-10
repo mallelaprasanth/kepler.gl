@@ -230,7 +230,11 @@ export function filterData(data, dataId, filters) {
   }
 
   if (!filters.length) {
-    return {data, filteredIndex: data.map((d, i) => i)};
+    return {
+      data,
+      filteredIndex: data.map((d, i) => i),
+      filteredIndexForDomain: data.map((d, i) => i)
+    };
   }
 
   const appliedFilters = filters.filter(
@@ -348,9 +352,8 @@ export function adjustValueToFilterDomain(value, {domain, type}) {
         return domain.map(d => d);
       }
 
-      return value.map(
-        (d, i) =>
-          notNullorUndefined(d) && isInRange(d, domain) ? d : domain[i]
+      return value.map((d, i) =>
+        notNullorUndefined(d) && isInRange(d, domain) ? d : domain[i]
       );
 
     case FILTER_TYPES.multiSelect:
@@ -498,8 +501,8 @@ export function getTimeWidgetTitleFormatter(domain) {
   return diff > durationYear
     ? 'MM/DD/YY'
     : diff > durationDay
-      ? 'MM/DD hha'
-      : 'MM/DD hh:mma';
+    ? 'MM/DD hha'
+    : 'MM/DD hh:mma';
 }
 
 export function getTimeWidgetHintFormatter(domain) {
@@ -511,12 +514,12 @@ export function getTimeWidgetHintFormatter(domain) {
   return diff > durationYear
     ? 'MM/DD/YY'
     : diff > durationWeek
-      ? 'MM/DD'
-      : diff > durationDay
-        ? 'MM/DD hha'
-        : diff > durationHour
-          ? 'hh:mma'
-          : 'hh:mm:ssa';
+    ? 'MM/DD'
+    : diff > durationDay
+    ? 'MM/DD hha'
+    : diff > durationHour
+    ? 'hh:mma'
+    : 'hh:mm:ssa';
 }
 
 /**
