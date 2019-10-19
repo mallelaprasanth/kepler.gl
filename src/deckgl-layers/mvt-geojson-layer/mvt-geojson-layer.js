@@ -118,23 +118,29 @@ export default class DeckGLMVTLayer extends CompositeLayer {
             finalData = finalData.concat(data[i]);
           }
           this.setState({features: finalData});
-          if (this.props.filters.length > 0) {
+          if (finalData.length > 0) {
+            this.props.loadEDLinkData(
+              {
+                type: 'FeatureCollection',
+                features: finalData,
+                crs: {type: 'name', properties: 'urn:ogc:def:crs:OGC:1.3:CRS84'}
+              },
+              this.props.url
+            );
           }
-          this.props.loadEDLinkData(
-            {
-              type: 'FeatureCollection',
-              features: finalData,
-              crs: {type: 'name', properties: 'urn:ogc:def:crs:OGC:1.3:CRS84'}
-            },
-            this.props.url
-          );
         }
       },
       getTileData: ({x, y, z}) => {
+        // const mapSource =
+        // `https://vectortiledata.s3.ap-south-1.amazonaws.com/` +
+        // `${z}/${x}/${y}` +
+        // `.pbf`;
         const mapSource =
-          `https://api.mapbox.com/v4/tusheet.7qjwz70j/` +
-          `${z}/${x}/${y}` +
-          `.mvt?access_token=pk.eyJ1IjoidHVzaGVldCIsImEiOiJjamd3c2Jwdm0xZDJmMndwZGU1OHdvY2prIn0.YwS7ngyYFXDnRYodIV0J4Q`;
+          `http://127.0.0.1:5009/tiles25/` + `${z}/${x}/${y}` + `.pbf`;
+        // const mapSource =
+        //   `https://api.mapbox.com/v4/tusheet.7qjwz70j/` +
+        //   `${z}/${x}/${y}` +
+        //   `.mvt?access_token=pk.eyJ1IjoidHVzaGVldCIsImEiOiJjamd3c2Jwdm0xZDJmMndwZGU1OHdvY2prIn0.YwS7ngyYFXDnRYodIV0J4Q`;
         //const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/`+`${z}/${x}/${y}` + `.vector.pbf?access_token=pk.eyJ1IjoidHVzaGVldCIsImEiOiJjamd3c2Jwdm0xZDJmMndwZGU1OHdvY2prIn0.YwS7ngyYFXDnRYodIV0J4Q`;
         return fetch(mapSource)
           .then(response => response.arrayBuffer())
@@ -202,9 +208,12 @@ export default class DeckGLMVTLayer extends CompositeLayer {
       extruded: true,
       opacity: 1,
       filled: true,
-      lineWidthScale: 20,
+      lineWidthScale: 1,
       lineWidthMinPixels: 2,
       getElevation: feature => feature.properties.height || 0,
+      // getFillColor: [160, 160, 180, 200],
+      // getLineColor: [255, 128, 75],
+      // getRadius: 40,
       getFillColor: mapPropertyToValue(
         this.props.filters,
         this.props.url,
@@ -281,7 +290,7 @@ function mapPropertyToValue(
               ) {
                 return [0, 255, 255];
               } else {
-                return [0, 255, 255, 0];
+                return [0, 255, 255, 255];
               }
             } else if (config[i].type == 'select') {
               if (f.properties[config[i].name] == config[i].value) {
@@ -298,7 +307,7 @@ function mapPropertyToValue(
       }
     } else {
       return colorField
-        ? getEncodedChannelValue(cScale, f.properties['Population'], colorField)
+        ? getEncodedChannelValue(cScale, f.properties['Pincode'], colorField)
         : [255, 255, 0];
     }
   };

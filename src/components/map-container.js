@@ -19,23 +19,23 @@
 // THE SOFTWARE.
 
 // libraries
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import MapboxGLMap from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import { createSelector } from 'reselect';
+import {createSelector} from 'reselect';
 import WebMercatorViewport from 'viewport-mercator-project';
 
 // components
 import MapPopoverFactory from 'components/map/map-popover';
 import MapControlFactory from 'components/map/map-control';
-import { StyledMapContainer } from 'components/common/styled-components';
+import {StyledMapContainer} from 'components/common/styled-components';
 
 // utils
-import { generateMapboxLayers, updateMapboxLayers } from 'layers/mapbox-utils';
-import { OVERLAY_TYPE } from 'layers/base-layer';
-import { onWebGLInitialized, setLayerBlending } from 'utils/gl-utils';
-import { transformRequest } from 'utils/map-style-utils/mapbox-utils';
+import {generateMapboxLayers, updateMapboxLayers} from 'layers/mapbox-utils';
+import {OVERLAY_TYPE} from 'layers/base-layer';
+import {onWebGLInitialized, setLayerBlending} from 'utils/gl-utils';
+import {transformRequest} from 'utils/map-style-utils/mapbox-utils';
 
 // default-settings
 import ThreeDBuildingLayer from 'deckgl-layers/3d-building-layer/3d-building-layer';
@@ -46,7 +46,9 @@ const MAP_STYLE = {
     position: 'relative'
   },
   top: {
-    position: 'absolute', top: '0px', pointerEvents: 'none'
+    position: 'absolute',
+    top: '0px',
+    pointerEvents: 'none'
   }
 };
 
@@ -54,9 +56,7 @@ const MAPBOXGL_STYLE_UPDATE = 'style.load';
 const MAPBOXGL_RENDER = 'render';
 const TRANSITION_DURATION = 0;
 
-MapContainerFactory.deps = [
-  MapPopoverFactory, MapControlFactory
-];
+MapContainerFactory.deps = [MapPopoverFactory, MapControlFactory];
 
 export default function MapContainerFactory(MapPopover, MapControl) {
   class MapContainer extends Component {
@@ -119,11 +119,16 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       this.layerDataSelector,
       this.mapLayersSelector,
       // {[id]: true \ false}
-      (layers, layerData, mapLayers) => layers.reduce((accu, layer, idx) => ({
-        ...accu,
-        [layer.id]: layer.shouldRenderLayer(layerData[idx]) &&
-          this._isVisibleMapLayer(layer, mapLayers)
-      }), {})
+      (layers, layerData, mapLayers) =>
+        layers.reduce(
+          (accu, layer, idx) => ({
+            ...accu,
+            [layer.id]:
+              layer.shouldRenderLayer(layerData[idx]) &&
+              this._isVisibleMapLayer(layer, mapLayers)
+          }),
+          {}
+        )
     );
 
     mapboxLayersSelector = createSelector(
@@ -132,7 +137,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       this.layerOrderSelector,
       this.layersToRenderSelector,
       generateMapboxLayers
-    )
+    );
     /* component private functions */
     _isVisibleMapLayer(layer, mapLayers) {
       // if layer.id is not in mapLayers, don't render it
@@ -152,7 +157,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
     _onWebGLInitialized = onWebGLInitialized;
 
     _handleMapToggleLayer = layerId => {
-      const { index: mapIndex = 0, visStateActions } = this.props;
+      const {index: mapIndex = 0, visStateActions} = this.props;
       visStateActions.toggleLayerForMap(mapIndex, layerId);
     };
 
@@ -168,7 +173,6 @@ export default function MapContainerFactory(MapPopover, MapControl) {
 
     _setMapboxMap = mapbox => {
       if (!this._map && mapbox) {
-
         this._map = mapbox.getMap();
         // i noticed in certain context we don't access the actual map element
         if (!this._map) {
@@ -178,7 +182,6 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         this._map.on(MAPBOXGL_STYLE_UPDATE, this._onMapboxStyleUpdate);
 
         this._map.on(MAPBOXGL_RENDER, () => {
-
           if (typeof this.props.onMapRender === 'function') {
             this.props.onMapRender(this._map);
           }
@@ -193,7 +196,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       }
     };
 
-    _onBeforeRender = ({ gl }) => {
+    _onBeforeRender = ({gl}) => {
       setLayerBlending(gl, this.props.layerBlending);
     };
 
@@ -208,7 +211,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         datasets,
         interactionConfig,
         layers,
-        mousePos: { mousePosition, coordinate, pinned }
+        mousePos: {mousePosition, coordinate, pinned}
       } = this.props;
 
       if (!mousePosition) {
@@ -217,7 +220,7 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       // if clicked something, ignore hover behavior
       const objectInfo = clicked || hoverInfo;
       let layerHoverProp = null;
-      let position = { x: mousePosition[0], y: mousePosition[1] };
+      let position = {x: mousePosition[0], y: mousePosition[1]};
 
       if (
         interactionConfig.tooltip.enabled &&
@@ -225,24 +228,35 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         objectInfo.picked
       ) {
         // if anything hovered
-        const { object, layer: overlay } = objectInfo;
+        const {object, layer: overlay} = objectInfo;
 
         // deckgl layer to kepler-gl layer
         const layer = layers[overlay.props.idx];
 
-        if (
-          layer.getHoverData &&
-          layersToRender[layer.id]
-        ) {
+        if (layer.getHoverData && layersToRender[layer.id]) {
           if (layer.name == 'mvtlayer') {
-            const { config: { dataId } } = layer;
-            const fieldKeys = Object.keys(object.properties)
+            const {
+              config: {dataId}
+            } = layer;
+            const fieldKeys = Object.keys(object.properties);
             let fields = [];
-            fields.push({format:"",id:"_geojson",name:"_geojson",tableFieldIndex:1,type:"geojson"})
-            fields.push({format:"",id:"population",name:"Population",tableFieldIndex:2,type:"integer"})
+            fields.push({
+              format: '',
+              id: '_geojson',
+              name: '_geojson',
+              tableFieldIndex: 1,
+              type: 'geojson'
+            });
+            fields.push({
+              format: '',
+              id: 'population',
+              name: 'Population',
+              tableFieldIndex: 2,
+              type: 'integer'
+            });
 
             let data = Object.values(object.properties);
-            data = [object,...data]
+            data = [object, ...data];
             const fieldsToShow = fieldKeys;
 
             layerHoverProp = {
@@ -250,28 +264,26 @@ export default function MapContainerFactory(MapPopover, MapControl) {
               fields,
               fieldsToShow,
               layer
-            }
+            };
           }
           // if layer is visible and have hovered data
           else {
             if (!layer.dataId) {
-              const { config: { dataId } } = layer;
-              const { allData, fields } = datasets[dataId];
+              const {
+                config: {dataId}
+              } = layer;
+              const {allData, fields} = datasets[dataId];
               const data = layer.getHoverData(object, allData);
-              const fieldsToShow = interactionConfig.tooltip.config.fieldsToShow[dataId];
+              const fieldsToShow =
+                interactionConfig.tooltip.config.fieldsToShow[dataId];
               layerHoverProp = {
                 data,
                 fields,
                 fieldsToShow,
                 layer
-
-              }
+              };
             }
-
-
-
           }
-
         }
       }
 
@@ -286,7 +298,10 @@ export default function MapContainerFactory(MapPopover, MapControl) {
           <MapPopover
             {...position}
             layerHoverProp={layerHoverProp}
-            coordinate={interactionConfig.coordinate.enabled && ((pinned || {}).coordinate || coordinate)}
+            coordinate={
+              interactionConfig.coordinate.enabled &&
+              ((pinned || {}).coordinate || coordinate)
+            }
             freezed={Boolean(clicked || pinned)}
             onClose={this._onCloseMapPopover}
             mapW={mapState.width}
@@ -299,9 +314,10 @@ export default function MapContainerFactory(MapPopover, MapControl) {
     /* eslint-enable complexity */
 
     _getHoverXY(viewport, lngLat) {
-      const screenCoord = !viewport || !lngLat ? null : viewport.project(lngLat);
+      const screenCoord =
+        !viewport || !lngLat ? null : viewport.project(lngLat);
 
-      return screenCoord && { x: screenCoord[0], y: screenCoord[1] };
+      return screenCoord && {x: screenCoord[0], y: screenCoord[1]};
     }
 
     _renderLayer = (overlays, idx) => {
@@ -339,7 +355,8 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         interactionConfig,
         layerCallbacks,
         datasets,
-        loadEDLinkData: (data,dataId)=>visStateActions.loadEDLinkData(data,dataId)
+        loadEDLinkData: (data, dataId) =>
+          visStateActions.loadEDLinkData(data, dataId)
       });
 
       return overlays.concat(layerOverlay || []);
@@ -364,20 +381,26 @@ export default function MapContainerFactory(MapPopover, MapControl) {
         deckGlLayers = layerOrder
           .slice()
           .reverse()
-          .filter(idx => layers[idx].overlayType === OVERLAY_TYPE.deckgl && layersToRender[layers[idx].id])
+          .filter(
+            idx =>
+              layers[idx].overlayType === OVERLAY_TYPE.deckgl &&
+              layersToRender[layers[idx].id]
+          )
           .reduce(this._renderLayer, []);
       }
 
       if (mapStyle.visibleLayerGroups['3d building']) {
-        deckGlLayers.push(new ThreeDBuildingLayer({
-          id: '_keplergl_3d-building',
-          mapboxApiAccessToken,
-          mapboxApiUrl,
-          threeDBuildingColor: mapStyle.threeDBuildingColor,
-          updateTriggers: {
-            getFillColor: mapStyle.threeDBuildingColor
-          }
-        }));
+        deckGlLayers.push(
+          new ThreeDBuildingLayer({
+            id: '_keplergl_3d-building',
+            mapboxApiAccessToken,
+            mapboxApiUrl,
+            threeDBuildingColor: mapStyle.threeDBuildingColor,
+            updateTriggers: {
+              getFillColor: mapStyle.threeDBuildingColor
+            }
+          })
+        );
       }
 
       return (
@@ -396,15 +419,14 @@ export default function MapContainerFactory(MapPopover, MapControl) {
 
     _updateMapboxLayers() {
       const mapboxLayers = this.mapboxLayersSelector(this.props);
-      if (!Object.keys(mapboxLayers).length && !Object.keys(this.previousLayers).length) {
+      if (
+        !Object.keys(mapboxLayers).length &&
+        !Object.keys(this.previousLayers).length
+      ) {
         return;
       }
 
-      updateMapboxLayers(
-        this._map,
-        mapboxLayers,
-        this.previousLayers
-      );
+      updateMapboxLayers(this._map, mapboxLayers, this.previousLayers);
 
       this.previousLayers = mapboxLayers;
     }
@@ -415,17 +437,26 @@ export default function MapContainerFactory(MapPopover, MapControl) {
       }
     }
 
-    _onViewportChange = (viewState) => {
+    _onViewportChange = viewState => {
       if (typeof this.props.onViewStateChange === 'function') {
         this.props.onViewStateChange(viewState);
       }
       this.props.mapStateActions.updateMap(viewState);
-    }
+    };
 
     render() {
       const {
-        mapState, mapStyle, mapStateActions, mapLayers, layers, MapComponent,
-        datasets, mapboxApiAccessToken, mapboxApiUrl, mapControls, toggleMapControl
+        mapState,
+        mapStyle,
+        mapStateActions,
+        mapLayers,
+        layers,
+        MapComponent,
+        datasets,
+        mapboxApiAccessToken,
+        mapboxApiUrl,
+        mapControls,
+        toggleMapControl
       } = this.props;
       const layersToRender = this.layersToRenderSelector(this.props);
       if (!mapStyle.bottomMapStyle) {

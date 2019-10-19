@@ -61,18 +61,7 @@ export const geojsonVisConfigs = {
 };
 
 const colorRange = {
-  colors: [
-    '#12939A',
-    '#DDB27C',
-    '#88572C',
-    '#FF991F',
-    '#F15C17',
-    '#12939A',
-    '#DDB27C',
-    '#88572C',
-    '#FF991F',
-    '#F15C17'
-  ]
+  colors: ['#12939A', '#DDB27C', '#88572C', '#FF991F', '#F15C17']
 };
 
 export default class MVTLayer extends Layer {
