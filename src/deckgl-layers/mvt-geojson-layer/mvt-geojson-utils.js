@@ -24,17 +24,13 @@ import {worldToLngLat} from 'viewport-mercator-project';
 
 /* global fetch */
 const TILE_SIZE = 512;
-const MAPBOX_HOST = 'https://a.tiles.mapbox.com';
-const MAP_SOURCE = '/v4/mapbox.mapbox-streets-v7';
 
-export function getTileData(host, token, {x, y, z}) {
-  const mapSource = `${host ||
-    MAPBOX_HOST}${MAP_SOURCE}/${z}/${x}/${y}.vector.pbf?access_token=${token}`;
-
-  return fetch(mapSource)
-    .then(response => response.arrayBuffer())
-    .then(buffer => decodeTile(x, y, z, buffer));
-}
+// export function getTileData(baseUrl, {x, y, z}) {
+// const mapSource = baseUrl+
+//   return fetch(mapSource)
+//     .then(response => response.arrayBuffer())
+//     .then(buffer => decodeTile(x, y, z, buffer));
+// }
 
 export function decodeTile(x, y, z, arrayBuffer) {
   const tile = new VectorTile(new Protobuf(arrayBuffer));
@@ -47,7 +43,7 @@ export function decodeTile(x, y, z, arrayBuffer) {
   const projectFunc = project.bind(null, xProj, yProj, scale);
 
   /* eslint-disable guard-for-in */
-  const layerName = 'building';
+  const layerName = 'population';
   const vectorTileLayer = tile.layers[layerName];
   if (!vectorTileLayer) {
     return [];
@@ -55,11 +51,15 @@ export function decodeTile(x, y, z, arrayBuffer) {
   for (let i = 0; i < vectorTileLayer.length; i++) {
     const vectorTileFeature = vectorTileLayer.feature(i);
     const features = vectorTileFeatureToProp(vectorTileFeature, projectFunc);
+    let geoFeats = [];
     features.forEach(f => {
-      f.properties.layer = layerName;
-      if (f.properties.height) {
-        result.push(f);
-      }
+      //f.properties.layer = layerName;
+      //result.push(f);
+      result.push({
+        type: 'Feature',
+        geometry: {type: 'Polygon', coordinates: f.coordinates},
+        properties: f.properties
+      });
     });
   }
   return result;

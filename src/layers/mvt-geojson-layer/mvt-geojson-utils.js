@@ -31,7 +31,7 @@ export const calculateLayerDomain(data) {
     const {scale} = visualChannel;
     const scaleType = 'quantile';
 
-    const field = {format:"",id:"population",name:"Population",tableFieldIndex:1,type:"integer"};
+    const field = {format:"",id:"Pincode",name:"Pincode",tableFieldIndex:1,type:"integer"};
     if (!field) {
       // if colorField or sizeField were set back to null
       return defaultDomain;

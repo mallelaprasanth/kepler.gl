@@ -18,56 +18,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import { CompositeLayer } from '@deck.gl/core';
-import { TileLayer as DeckGLTileLayer } from '@deck.gl/geo-layers';
-import { getTileData } from './3d-building-utils';
-import { GeoJsonLayer } from '@deck.gl/layers';
-import Protobuf from 'pbf';
-import {VectorTile, VectorTileFeature} from '@mapbox/vector-tile';
-import {worldToLngLat} from 'viewport-mercator-project';
+import {CompositeLayer} from '@deck.gl/core';
+import {TileLayer as DeckGLTileLayer} from '@deck.gl/geo-layers';
+import {getTileData} from './3d-building-utils';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
 export default class ThreeDBuildingLayer extends CompositeLayer {
   // this layer add its subLayers to the redux store, and push sample data
 
   renderSubLayers(props) {
-    return new GeoJsonLayer({
+    return new SolidPolygonLayer({
       ...props,
-
+      parameter: {
+        blendFunc: [
+          'SRC_ALPHA',
+          'ONE_MINUS_SRC_ALPHA',
+          'ONE',
+          'ONE_MINUS_SRC_ALPHA'
+        ],
+        blendEquation: ['FUNC_ADD', 'FUNC_ADD']
+      },
       extruded: true,
       opacity: 1,
       filled: true,
-      lineWidthScale: 20,
-      lineWidthMinPixels: 2,
-      getElevation: (feature) => feature.properties.height || 0,
-      // getPolygon: (feature) => feature.coordinates,
-      getFillColor: this.props.threeDBuildingColor,
-      lightSetting: {
-        ambientRatio: 0.2
-      }
+      getElevation: feature => feature.properties.height || 0,
+      getPolygon: feature => feature.coordinates,
+      getFillColor: this.props.threeDBuildingColor
     });
   }
-  
+
   renderLayers() {
     return [
       new DeckGLTileLayer({
-        getTileData: ({x, y, z}) => {
-          const mapSource = `https://api.mapbox.com/v4/tusheet.7qjwz70j/${z}/${x}/${y}.mvt?access_token=${this.props.mapboxApiAccessToken}`;
-          return fetch(mapSource)
-            .then(response => response.arrayBuffer())
-            .then(buffer => {
-              const tile = new VectorTile(new Protobuf(buffer));
-              const features = [];
-              for (const layerName in tile.layers) {
-                const vectorTileLayer = tile.layers[layerName];
-                for (let i = 0; i < vectorTileLayer.length; i++) {
-                  const vectorTileFeature = vectorTileLayer.feature(i);
-                  const feature = vectorTileFeature.toGeoJSON(x, y, z);
-                  features.push(feature);
-                }
-              }
-              return features;
-            });
-        },
+        getTileData: args =>
+          getTileData(
+            this.props.mapboxApiUrl,
+            this.props.mapboxApiAccessToken,
+            args
+          ),
         minZoom: 13,
         renderSubLayers: this.renderSubLayers.bind(this),
         updateTriggers: this.props.updateTriggers

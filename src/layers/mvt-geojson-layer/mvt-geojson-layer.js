@@ -137,8 +137,8 @@ export default class MVTLayer extends Layer {
     this.updateLayerConfig({
       colorField: {
         format: '',
-        id: 'population',
-        name: 'Population',
+        id: 'Pincode',
+        name: 'Pincode',
         tableFieldIndex: 2,
         type: 'integer'
       }
@@ -146,8 +146,8 @@ export default class MVTLayer extends Layer {
     this.updateLayerDomain(datasets[this.config.dataId]);
     const colorField = {
       format: '',
-      id: 'population',
-      name: 'Population',
+      id: 'Pincode',
+      name: 'Pincode',
       tableFieldIndex: 1,
       type: 'integer'
     };
@@ -189,8 +189,8 @@ export default class MVTLayer extends Layer {
               getLineColor: [255, 255, 0],
               getFillColor: [0, 255, 255],
               stroked: true,
-              pickable: false,
-              filled: false
+              pickable: true,
+              filled: true
             })
           ]
         : [])

@@ -55,6 +55,7 @@ const MAP_STYLE = {
 const MAPBOXGL_STYLE_UPDATE = 'style.load';
 const MAPBOXGL_RENDER = 'render';
 const TRANSITION_DURATION = 0;
+var hoveredStateId = null;
 
 MapContainerFactory.deps = [MapPopoverFactory, MapControlFactory];
 
@@ -232,6 +233,12 @@ export default function MapContainerFactory(MapPopover, MapControl) {
 
         // deckgl layer to kepler-gl layer
         const layer = layers[overlay.props.idx];
+        if (layer == undefined) {
+          return null;
+        }
+        if (!layer.hasOwnProperty('getHoverData')) {
+          return null;
+        }
 
         if (layer.getHoverData && layersToRender[layer.id]) {
           if (layer.name == 'mvtlayer') {
@@ -249,8 +256,8 @@ export default function MapContainerFactory(MapPopover, MapControl) {
             });
             fields.push({
               format: '',
-              id: 'population',
-              name: 'Population',
+              id: 'Pincode',
+              name: 'Pincode',
               tableFieldIndex: 2,
               type: 'integer'
             });
@@ -418,6 +425,57 @@ export default function MapContainerFactory(MapPopover, MapControl) {
     }
 
     _updateMapboxLayers() {
+      let lyrs = this._map.getStyle().layers;
+      if (lyrs.length > 0) {
+        let pcLyr = undefined;
+        lyrs.forEach(item => {
+          if (item['id'] == 'pincodesfgf') {
+            pcLyr = item;
+          }
+        });
+        if (pcLyr === undefined) {
+          this._map.addLayer({
+            id: 'pincodesfgf',
+            type: 'fill',
+            source: {
+              type: 'vector',
+              tiles: ['http://localhost:5009/pop_merged/{z}/{x}/{y}.pbf']
+            },
+            'source-layer': 'population',
+            layout: {
+              visibility: 'visible'
+            },
+            paint: {
+              'fill-color': '#6e599f',
+              'fill-outline-color': 'white',
+              'fill-opacity': 0
+            }
+          });
+
+          // this._map.on('sourcedata', e => {
+          //   if (this._map.isSourceLoaded('pincodes')) {
+          //     var features = this._map.querySourceFeatures('pincodes', {
+          //       sourceLayer: 'grid_0'
+          //     });
+          //   } else {
+          //     console.log('source loading!');
+          //   }
+          // });
+
+          // this._map.on('mousemove', 'pincodes', function(e) {
+          //   if (e.features.length > 0) {
+
+          //     var feature = e.features[0];
+          //     this._map.setFilter('pincodes-highlighted', [
+          //       '==',
+          //       'Pincode',
+          //       feature.properties.Pincode
+          //     ]);
+          //   }
+          // });
+        }
+      }
+
       const mapboxLayers = this.mapboxLayersSelector(this.props);
       if (
         !Object.keys(mapboxLayers).length &&

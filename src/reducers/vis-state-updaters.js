@@ -761,8 +761,8 @@ export const addLayerUpdater = (state, action) => {
           },
           {
             format: '',
-            id: 'population',
-            name: 'Population',
+            id: 'Pincode',
+            name: 'Pincode',
             tableFieldIndex: 2,
             type: 'integer'
           }
